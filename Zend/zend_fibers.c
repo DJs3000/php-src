@@ -433,7 +433,11 @@ ZEND_API zend_result zend_fiber_init_context(zend_fiber_context *context, void *
 	handle->uc_stack.ss_flags = 0;
 	handle->uc_link = NULL;
 
+    #ifdef __e2k__
+    makecontext_e2k(handle, (void (*)(void)) zend_fiber_trampoline, 0);
+    #else
 	makecontext(handle, (void (*)(void)) zend_fiber_trampoline, 0);
+	#endif
 
 	context->handle = handle;
 #else
@@ -1154,4 +1158,8 @@ void zend_fiber_shutdown(void)
 	efree(EG(main_fiber_context));
 
 	zend_fiber_switch_block();
+
+    #ifdef __e2k__
+    freecontext_e2k(handle);
+    #endif
 }
